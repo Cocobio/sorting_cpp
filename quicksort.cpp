@@ -28,6 +28,7 @@ the right side.
 // STATIC PIVOT SELECTION AT 0
 template <typename T, typename Func>
 void quicksort(T *v, int size, Func eval) {
+	__quicksort_tail_recursion:
 	// Base case
 	if (size <= 1) return;
 
@@ -51,8 +52,21 @@ void quicksort(T *v, int size, Func eval) {
 	SWAP(v[pivot], v[front-1], swap_tmp);
 
 	// Recursively call on left and right sides
-	quicksort(&v[0], front-1, eval);
-	quicksort(&v[front], size-front, eval);
+	// quicksort(&v[0], front-1, eval);
+	// quicksort(&v[front], size-front, eval);
+
+	// tail recursion call optimization to avoid stack overflow
+	if (size-front <= 1) {
+		size = front-1;
+		goto __quicksort_tail_recursion;
+	}
+	else if (front-1>1)
+		quicksort(&v[0], front-1, eval);
+
+	// tail recursion call optimization
+	v = &v[front];
+	size -= front;
+	goto __quicksort_tail_recursion;
 }
 
 // Default order set on ascending
@@ -64,6 +78,7 @@ void quicksort(T *v, int size) {
 // RANDOM PIVOT SELECTION
 template <typename T, typename Func>
 void _quicksortRandomPivot(T *v, int size, Func eval) {
+	__quicksortRandomPivot_Tail_recursion_call:
 	// Base case
 	if (size <= 1) return;
 
@@ -93,7 +108,12 @@ void _quicksortRandomPivot(T *v, int size, Func eval) {
 
 	// Recursively call on left and right sides
 	_quicksortRandomPivot(&v[0], front-1, eval);
-	_quicksortRandomPivot(&v[front], size-front, eval);
+	// _quicksortRandomPivot(&v[front], size-front, eval);
+
+	// tail recursion call
+	v += front;
+	size -= front;
+	goto __quicksortRandomPivot_Tail_recursion_call;
 }
 
 // Drive function for seting the seed needed in rand function
@@ -119,7 +139,7 @@ void quicksortRandomPivot(T *v, int size) {
 using namespace std;
 
 int main() {
-	int size=50;
+	int size=100;
 	int v[size];
 
 	initRandomV(v, size, size, 0);
@@ -127,7 +147,7 @@ int main() {
 
 	quicksort(v, size, [] (int a, int b) {return a>b;});
 	printV(v, size);
-	quicksortRandomPivot(v, size);
+	quicksort(v, size);
 	printV(v, size);
 	return 0;
 }

@@ -9,40 +9,6 @@
 
 using namespace std;
 
-// Binary file writer from a vector
-template <typename T>
-void writeFileWithVector(T* v, int size, string name, string folder) {
-	//we output the data into a binary file
-	ofstream output;
-
-	// we open a binary file (if it exists it overwrites it)
-	// we write 4 bytes with a int saving the size of the vector
-	// and then we write the vector
-	output.open(folder+name, ios::binary | ios::out | ios::trunc);
-	output.write((char*)&size, sizeof(int));
-	output.write((char*)v, size*sizeof(T));
-		
-	// we close the file
-	output.close();
-}
-
-// Binary file reader from a vector
-template <typename T>
-T* readVectorFromFile(int *size, string file) {
-	ifstream input;
-	T *v;
-
-	input.open(file, ios::binary | ios::in);
-	input.read((char*)size, sizeof(int));
-		
-	v = (T*) malloc((*size)*sizeof(T));
-
-	input.read((char*)v, (*size)*sizeof(T));
-	input.close();
-
-	return v;
-}
-
 // Utility function for testing
 template <typename T, typename Func>
 int checkSorting(T *v, int size, Func eval) {
@@ -107,27 +73,7 @@ void printV(T *v, int size) {
 	cout << "}\n";
 }
 
-// Sort a bin file to a bin file
-// Function with evaluator
-template <typename T, typename Func>
-void sortBinFileToBinFile(string input_file, string output_file, void (*s)(T*,int,Func), Func eval) {
-	int size;
-	T *v;
-	v = readVectorFromFile<T>(&size, input_file);
-	s(v, size, eval);
-	writeFileWithVector(v, size, output_file, ""); 
-}
 
-// Function with default evaluator
-template <typename T>
-void sortBinFileToBinFile(string input_file, string output_file, void (*s)(T*,int)) {
-	// sortBinFileToBinFile<T>(input_file, output_file, s, [](T a, T b) { return a<b; });
-	int size;
-	T *v;
-	v = readVectorFromFile<T>(&size, input_file);
-	s(v, size);
-	writeFileWithVector(v, size, output_file, ""); 
-}
 
 // ----------------------------------------------
 // time measure functions
@@ -161,6 +107,62 @@ double measureTimeOf(void s (T*,int,Func), T *v, int size, Func eval) {
 	t = clock() - t; 
 	double time_taken = ((double)t)/CLOCKS_PER_SEC; // in seconds 
 	return time_taken;
+}
+
+// Binary file writer from a vector
+template <typename T>
+void writeFileWithVector(T* v, int size, string name, string folder) {
+	//we output the data into a binary file
+	ofstream output;
+
+	// we open a binary file (if it exists it overwrites it)
+	// we write 4 bytes with a int saving the size of the vector
+	// and then we write the vector
+	output.open(folder+name, ios::binary | ios::out | ios::trunc);
+	output.write((char*)&size, sizeof(int));
+	output.write((char*)v, size*sizeof(T));
+		
+	// we close the file
+	output.close();
+}
+
+// Binary file reader from a vector
+template <typename T>
+T* readVectorFromFile(int *size, string file) {
+	ifstream input;
+	T *v;
+
+	input.open(file, ios::binary | ios::in);
+	input.read((char*)size, sizeof(int));
+		
+	v = (T*) malloc((*size)*sizeof(T));
+
+	input.read((char*)v, (*size)*sizeof(T));
+	input.close();
+
+	return v;
+}
+
+// Sort a bin file to a bin file
+// Function with evaluator
+template <typename T, typename Func>
+void sortBinFileToBinFile(string input_file, string output_file, void (*s)(T*,int,Func), Func eval) {
+	int size;
+	T *v;
+	v = readVectorFromFile<T>(&size, input_file);
+	s(v, size, eval);
+	writeFileWithVector(v, size, output_file, ""); 
+}
+
+// Function with default evaluator
+template <typename T>
+void sortBinFileToBinFile(string input_file, string output_file, void (*s)(T*,int)) {
+	// sortBinFileToBinFile<T>(input_file, output_file, s, [](T a, T b) { return a<b; });
+	int size;
+	T *v;
+	v = readVectorFromFile<T>(&size, input_file);
+	s(v, size);
+	writeFileWithVector(v, size, output_file, ""); 
 }
 
 #endif

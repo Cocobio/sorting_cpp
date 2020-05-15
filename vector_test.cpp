@@ -51,37 +51,58 @@ vector<string> getFileListWithinFolder(std::string folder) {
 
 // Function for creating data with a size and size_step
 void create_data_set() {
-	int n = 10000000;
-	int step = 10000;
+	int n = 1000000;
+	int step = 100000;
 	string name;
 	string folder;
 	void *v;
 
-	int a=23;
-	int size_v[] = {100,500,1000,2000,3000,4000,5000,10000,20000,30000,40000,50000,100000,200000,300000,400000,500000,1000000,2000000,3000000,4000000,5000000,10000000};
+	// int a=23;
+	// int size_v[] = {100,500,1000,2000,3000,4000,5000,10000,20000,30000,40000,50000,100000,200000,300000,400000,500000,1000000,2000000,3000000,4000000,5000000,10000000};
 
+	// delete
 	name = "intV_";
-	folder = "Datasets/vectorInt random With Unique Values/";
+	folder = "Datasets/vectorInt special/";
+
+	for (int size=step; size<=n; size+=step) {
+		std::stringstream ss;
+		ss << std::setw(8) << std::setfill('0') << size;
+
+		v = malloc(size*sizeof(int)); 
+		initRandomVWithUniqueValues((int*)v, size, size, 0);
+		quicksortRandomPivot(((int*)v)+size/3, size/3);
+		writeFileWithVector<int>((int*)v, size, name+ss.str()+".bin", folder);
+		free(v);
+	}
+
+
+
+
+	/////////////////////////////////////////////
+
+	// name = "intV_";
+	// folder = "Datasets/vectorInt Random 100 max value/";
 	// for (int size=step; size<=n; size+=step) {
 	// 	std::stringstream ss;
 	// 	ss << std::setw(8) << std::setfill('0') << size;
 
 	// 	v = malloc(size*sizeof(int)); 
-	// 	initRandomV((int*)v, size, size, 0);
+	// 	initRandomV((int*)v, size, 101, 0);
 	// 	writeFileWithVector<int>((int*)v, size, name+ss.str()+".bin", folder);
 	// 	free(v);
 	// }
-	for (int i=0; i<23; i++) {
-		std::stringstream ss;
-		ss << std::setw(8) << std::setfill('0') << size_v[i];
+	// for (int i=0; i<23; i++) {
+	// 	std::stringstream ss;
+	// 	ss << std::setw(8) << std::setfill('0') << size_v[i];
 
-		v = malloc(size_v[i]*sizeof(int)); 
-		// initRandomV((int*)v, size_v[i], size_v[i], 0);
-		// initSortedV((int*)v, size_v[i], size_v[i], 0);
-		initRandomVWithUniqueValues((int*)v, size_v[i], size_v[i], 0);
-		writeFileWithVector<int>((int*)v, size_v[i], name+ss.str()+".bin", folder);
-		free(v);
-	}
+	// 	v = malloc(size_v[i]*sizeof(int)); 
+	// 	// initRandomV((int*)v, size_v[i], size_v[i], 0);
+	// 	// initSortedV((int*)v, size_v[i], size_v[i], 0);
+	// 	initRandomVWithUniqueValues((int*)v, size_v[i], size_v[i], 0);
+	// 	quicksortRandomPivot(((int*)v)+size_v[i]/3, size_v[i]/3);
+	// 	writeFileWithVector<int>((int*)v, size_v[i], name+ss.str()+".bin", folder);
+	// 	free(v);
+	// }
 
 	// name = "floatV_";
 	// folder = "Datasets/vectorFloat/";
@@ -192,11 +213,9 @@ void runTVectorTestsWriteDataTo(void (*s)(T*,int), string folder, string output_
 
 	ofstream output;
 
-		
-	// we close the file
+	output.open(output_file, ios::out | ios::trunc);
 
-	for (vector<string>::iterator i = files.begin(); i<files.end()-9; i++) {
-	output.open(output_file, ios::out | ios::app);
+	for (vector<string>::iterator i = files.begin(); i<files.end(); i++) {
 		t_avr = 0;
 		cout << "Reading file: " << *i << endl;
 		
@@ -220,13 +239,13 @@ void runTVectorTestsWriteDataTo(void (*s)(T*,int), string folder, string output_
 
 		memcpy(v_tmp, v, size*sizeof(T));
 		output << t_avr << ";";
-		output.close();
 
 		// we free de memory that the vector and temporal vector were using
 		free(v);
 		free(v_tmp);
 	}
 
+	// we close the file
 	output.close();
 }
 
@@ -246,8 +265,6 @@ void runTVectorTestsWriteDataTo(void (*s)(T*,T*), string folder, string output_f
 	ofstream output;
 
 	output.open(output_file, ios::out | ios::trunc);
-		
-	// we close the file
 
 	for (vector<string>::iterator i = files.begin(); i<files.end(); i++) {
 		t_avr = 0;
@@ -284,7 +301,7 @@ void runTVectorTestsWriteDataTo(void (*s)(T*,T*), string folder, string output_f
 
 
 int main() {
-	srand(time(0));											// I dont know were to put this one, but its needed for the quicksortRandomPivot and create data sets
+	// srand(time(0));											// I dont know were to put this one, but its needed for the quicksortRandomPivot and create data sets
 	// create_data_set();										// uncomment for creating data
 
 
@@ -294,7 +311,7 @@ int main() {
 
 
 	// // This section is for sorting specific files with a specific sorting, and write the result into a file
-	// typedef float data_type;										// Must match vector type for the input file
+	// typedef int data_type;										// Must match vector type for the input file
 
 	// string input_file = "Datasets/vectorFloat/floatV_100.bin";
 	// string output_file = "Datasets/vectorFloat/Sorted/floatV_100.bin";
@@ -303,10 +320,13 @@ int main() {
 
 	// sortBinFileToBinFile<data_type>(input_file, output_file, quicksort, eval);
 
+	// string output_file = "Datasets/vectorInt/intV_10000000_sorted.bin";
+	// string output_file = "Datasets/vectorInt semi sorted With Unique Values/intV_00000100.bin";
+
 	// int size;
 	// data_type * v = readVectorFromFile<data_type>(&size, output_file);
-
-	// if (!checkSorting(v, size, eval)) cout << "Correct sorted order" << endl;
+	// printV(v, size);
+	// if (!checkSorting(v, size)) cout << "Correct sorted order" << endl;
 	// else cout << "Incorrect sorted order" << endl;
 
 	/*
@@ -326,8 +346,8 @@ int main() {
 	vector<string> f_names;
 
 	// uncomment for sorting integer vectors created by create_data_set
-	sortingFuncs.push_back(quicksort);
-	f_names.push_back("quicksort");
+	// sortingFuncs.push_back(quicksort);
+	// f_names.push_back("quicksort");
 
 	// sortingFuncs.push_back(quicksortRandomPivot);
 	// f_names.push_back("quicksortRandomPivot");
@@ -350,23 +370,42 @@ int main() {
 	// sortingFuncs.push_back(selectionsort);
 	// f_names.push_back("selectionsort");
 
-	for (int i=0; i<sortingFuncs.size(); i++) {
+	// for (int i=0; i<sortingFuncs.size(); i++) {
 		// runTVectorTestsWriteDataTo<int>(sortingFuncs[i], "Datasets/vectorInt", "Datasets/vectorInt/Sorted/"+f_names[i]+".txt");
 		// runTVectorTestsWriteDataTo<int>(sortingFuncs[i], "Datasets/vectorInt random With Unique Values", "Datasets/vectorInt random With Unique Values/Sorted/"+f_names[i]+".txt");
-		runTVectorTestsWriteDataTo<int>(sortingFuncs[i], "Datasets/vectorInt sorted", "Datasets/vectorInt sorted/Sorted/"+f_names[i]+".txt");
-	}
+		// runTVectorTestsWriteDataTo<int>(sortingFuncs[i], "Datasets/vectorInt sorted", "Datasets/vectorInt sorted/Sorted/"+f_names[i]+".txt");
+		// runTVectorTestsWriteDataTo<int>(sortingFuncs[i], "Datasets/vectorInt semi sorted With Unique Values", "Datasets/vectorInt semi sorted With Unique Values/Sorted/"+f_names[i]+".txt");
+		// runTVectorTestsWriteDataTo<int>(sortingFuncs[i], "Datasets/vectorInt Random 100 max value", "Datasets/vectorInt Random 100 max value/Sorted/"+f_names[i]+".txt");
+		
+	// 	runTVectorTestsWriteDataTo<int>(sortingFuncs[i], "Datasets/vectorInt special", "Datasets/vectorInt special/Sorted/"+f_names[i]+".txt");
+	// }
 
 	// runTVectorTestsWriteDataTo<int>(std::sort, "Datasets/vectorInt", "Datasets/vectorInt/Sorted/std_sort.txt");
 	// runTVectorTestsWriteDataTo<int>(std::sort, "Datasets/vectorInt random With Unique Values", "Datasets/vectorInt random With Unique Values/Sorted/std_sort.txt");
 	// runTVectorTestsWriteDataTo<int>(std::sort, "Datasets/vectorInt sorted", "Datasets/vectorInt sorted/Sorted/std_sort.txt");
+	// runTVectorTestsWriteDataTo<int>(std::sort, "Datasets/vectorInt semi sorted With Unique Values", "Datasets/vectorInt semi sorted With Unique Values/Sorted/std_sort.txt");
+	// runTVectorTestsWriteDataTo<int>(std::sort, "Datasets/vectorInt Random 100 max value", "Datasets/vectorInt Random 100 max value/Sorted/std_sort.txt");
 
 
 	// // Single test
-	// int *v;
-	// int size;
-	// v = readVectorFromFile<int>(&size, "Datasets/vectorInt/intV_10000000.bin");
-	// double t = measureTimeOf(quicksort, v, size);
-	// cout << "quicksort in " << t << "sec for " << size << " elements." << endl;
+	int *v;
+	int size;
+	v = readVectorFromFile<int>(&size, "Datasets/vectorInt random With Unique Values/intV_10000000.bin");
+	double t = measureTimeOf(quicksort, v, size);
+	cout << "heapsort in " << t << "sec for " << size << " elements." << endl;
+	if (!checkSorting(v, size)) cout << "Correct sorted order" << endl;
+	else cout << "Incorrect sorted order" << endl;
+	cout << v[0] << v[size-1] << endl;
+
+	// free(v);
+
+	initSortedV(v, size, size, 0);
+	shuffle(v,size);
+	t = measureTimeOf(quicksort, v, size);
+	cout << "heapsort in " << t << "sec for " << size << " elements." << endl;
+	if (!checkSorting(v, size)) cout << "Correct sorted order" << endl;
+	else cout << "Incorrect sorted order" << endl;
+	cout << v[0] << v[size-1] << endl;
 
 	return 0;
 }

@@ -27,10 +27,10 @@ void bubblesort(T *v, int size, Func eval) {
 	for (int i=0; i<size; i++) {
 		n_swaps = 0;
 
-		// for each i iteration, it iterates another n times
-		for (int j=0; j<size-1; j++)
-			if (eval(v[j+1], v[j])) {
-				SWAP(v[j], v[j+1], swap_tmp);
+		// for each i iteration, it through the size - i, since each i iteration it takes a extreme value to the end
+		for (int j=1; j<size-i; j++)
+			if (eval(v[j], v[j-1])) {
+				SWAP(v[j-1], v[j], swap_tmp);
 				n_swaps++;
 			}
 
@@ -58,7 +58,7 @@ using namespace std;
 
 int main() {
 	srand(time(0));
-	int size=50;
+	int size=100;
 	int v[size];
 
 	initRandomV(v, size, (int)size, (int)0.0);
