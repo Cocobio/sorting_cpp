@@ -25,17 +25,13 @@ the right side.
 #include <cstdlib>
 #include <ctime>
 
-// STATIC PIVOT SELECTION AT 0
+// quicksort partition subroutine using pivot at 0
 template <typename T, typename Func>
-void quicksort(T *v, int size, Func eval) {
-	__quicksort_tail_recursion:
-	// Base case
-	if (size <= 1) return;
-
+int partition(T *v, int size, Func eval) {
 	int pivot = 0, front;
 	T swap_tmp;
 	
-	// We set front to a proper place, without swapping unnecessary
+	// We set front to a proper place, without unnecessary swapping
 	for (front=1; front<size; front++)
 		if (eval(v[pivot], v[front]))
 			break;
@@ -51,21 +47,30 @@ void quicksort(T *v, int size, Func eval) {
 	// We swap pivot to the corresponding index on the sorted array
 	SWAP(v[pivot], v[front-1], swap_tmp);
 
-	// Recursively call on left and right sides
-	// quicksort(&v[0], front-1, eval);
-	// quicksort(&v[front], size-front, eval);
+	return front-1;
+}
+
+
+// STATIC PIVOT SELECTION AT 0
+template <typename T, typename Func>
+void quicksort(T *v, int size, Func eval) {
+	__quicksort_tail_recursion:
+	// Base case
+	if (size <= 1) return;
+
+	int pivot = partition(v, size, eval);
 
 	// tail recursion call optimization to avoid stack overflow
-	if (size-front <= 1) {
-		size = front-1;
+	if (size-pivot <= 2) {
+		size = pivot;
 		goto __quicksort_tail_recursion;
 	}
-	else if (front-1>1)
-		quicksort(&v[0], front-1, eval);
+	else if (pivot>1)
+		quicksort(v, pivot, eval);
 
 	// tail recursion call optimization
-	v = &v[front];
-	size -= front;
+	v = &v[pivot+1];
+	size -= pivot+1;
 	goto __quicksort_tail_recursion;
 }
 
@@ -82,37 +87,23 @@ void _quicksortRandomPivot(T *v, int size, Func eval) {
 	// Base case
 	if (size <= 1) return;
 
-	// We select a random pivot between the size bound.
-	int pivot = rand()%size, front;
+	// Random selection and reuse of partition with static selection
 	T swap_tmp;
+	SWAP(v[0], v[rand()%size], swap_tmp);
 	
-	// We swap the pivot to position 0
-	SWAP(v[0], v[pivot], swap_tmp);
-	pivot = 0;
+	int pivot = partition(v, size, eval);
 
-	// We set front to a proper place, without swapping unnecessary
-	for (front=1; front<size; front++)
-		if (eval(v[pivot], v[front]))
-			break;
-
-	// We iterate through the vector, keeping front left-most element of the right side (greather than the pivot)
-	for (int i=front+1; i<size; i++) {
-		if (eval(v[i], v[pivot])) {
-			SWAP(v[i], v[front], swap_tmp);
-			front++;
-		}
+	// tail recursion call optimization to avoid stack overflow
+	if (size-pivot <= 2) {
+		size = pivot;
+		goto __quicksortRandomPivot_Tail_recursion_call;
 	}
+	else if (pivot>1)
+		_quicksortRandomPivot(v, pivot, eval);
 
-	// We swap pivot to the corresponding index on the sorted array
-	SWAP(v[pivot], v[front-1], swap_tmp);
-
-	// Recursively call on left and right sides
-	_quicksortRandomPivot(&v[0], front-1, eval);
-	// _quicksortRandomPivot(&v[front], size-front, eval);
-
-	// tail recursion call
-	v += front;
-	size -= front;
+	// tail recursion call optimization
+	v = &v[pivot+1];
+	size -= pivot+1;
 	goto __quicksortRandomPivot_Tail_recursion_call;
 }
 
@@ -139,16 +130,19 @@ void quicksortRandomPivot(T *v, int size) {
 using namespace std;
 
 int main() {
-	int size=100;
+	int size=200000;
 	int v[size];
 
 	initRandomV(v, size, size, 0);
-	printV(v, size);
+	// printV(v, size);
 
-	quicksort(v, size, [] (int a, int b) {return a>b;});
-	printV(v, size);
-	quicksort(v, size);
-	printV(v, size);
+	quicksortRandomPivot(v, size, [] (int a, int b) {return a>b;});
+	cout << checkSorting(v,size, [](int a, int b) {return a>b;}) << endl;
+	// printV(v, size);
+	quicksortRandomPivot(v, size);
+	// printV(v, size);
+
+	cout << checkSorting(v, size) << endl;
 	return 0;
 }
 

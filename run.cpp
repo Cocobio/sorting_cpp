@@ -12,6 +12,9 @@
 #include "selectionsort.cpp"
 #include "insertionsort.cpp"
 
+// testing
+#include "introsort.cpp"
+
 using namespace std;
 
 typedef int data_type;
@@ -44,6 +47,9 @@ int main() {
 
 	sortingFuncs.push_back(insertionsort);
 	f_names.push_back("insertionsort");
+
+	sortingFuncs.push_back(introsort);
+	f_names.push_back("introsort");
 
 	// input and output data files
 	string input, output;
